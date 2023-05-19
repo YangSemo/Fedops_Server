@@ -51,6 +51,9 @@ def init_gl_model_registration(model, gl_model_name) -> None:
 
         fl_server_start(model, gl_model_name)
 
+    print(f'model_name: {model_name}')
+    print(f'gl_model_name: {gl_model_name}')
+
 
 def fl_server_start(model, model_name):
     # Load and compile model for
@@ -223,11 +226,11 @@ if __name__ == "__main__":
         json_all_time_result = json.dumps(server_all_time_result)
         logging.info(f'server_operation_time - {json_all_time_result}')
 
-        logging.info('upload model in s3')
-
         # upload global model
         global_model_name = f"{model_name}_gl_model_V{server.next_gl_model_v}.h5"
         server_utils.upload_model_to_bucket(task_id, global_model_name)
+
+        logging.info('upload model in s3')
 
         # server_status error
     except Exception as e:
