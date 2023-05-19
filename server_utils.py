@@ -30,25 +30,26 @@ def aws_session(region_name='ap-northeast-2'):
 
 
 # s3에 global model upload
-def upload_model_to_bucket(task_id, global_model, next_gl_model_v, model_name):
+def upload_model_to_bucket(task_id, global_model_name):
     bucket_name = os.environ.get('BUCKET_NAME')
 
-    logging.info(f'{model_name}_gl_model_%{next_gl_model_v}_V.h5 모델 업로드 시작')
+    # logging.info(f'Upload {global_model_name}')
 
     session = aws_session()
     s3_resource = session.resource('s3')
     bucket = s3_resource.Bucket(bucket_name)
     bucket.upload_file(
-        Filename=f'/app/{model_name}_gl_model_V{next_gl_model_v}.h5',
-        Key=f'{task_id}/{global_model}',
+        Filename=f'/app/{global_model_name}',
+        Key=f'{task_id}/{global_model_name}',
     )
 
-    s3_url = f"https://{bucket_name}.s3.amazonaws.com/{global_model}"
-    logging.info(f'Upload {model_name}_gl_model_v{next_gl_model_v}.h5')
-    return s3_url
+    logging.info(f'Upload {global_model_name}')
+
+    # s3_url = f"https://{bucket_name}.s3.amazonaws.com/{global_model_name}"
+    # return s3_url
 
 
-# s3에 저장되어 있는 latest global model download
+# Download the latest global model stored in s3
 def model_download(task_id):
     bucket_name = os.environ.get('BUCKET_NAME')
     # print('bucket_name: ', bucket_name)

@@ -161,11 +161,11 @@ if __name__ == "__main__":
     today_time = today.strftime('%Y-%m-%d %H-%M-%S')
 
     # global model init
-    model = None
-    server.latest_gl_model_v = 0
+    # model = None
+    # server.latest_gl_model_v = 0
 
-    # global model download
-    # model, server.latest_gl_model_v = model_download()
+    # Loaded latest global model or no global model
+    model, server.latest_gl_model_v = server_utils.model_download(task_id)
     # logging.info('Loaded latest global model or no global model')
 
     # New Global Model Version
@@ -211,7 +211,8 @@ if __name__ == "__main__":
         logging.info('upload model in s3')
 
         # upload global model
-        # upload_model_to_bucket("gl_model_%s_V.h5" %server.next_gl_model_v)
+        global_model_name = f"{task_id}_gl_model_V{server.next_gl_model_v}.h5"
+        server_utils.upload_model_to_bucket(task_id, global_model_name)
 
         # server_status error
     except Exception as e:
