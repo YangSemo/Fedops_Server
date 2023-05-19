@@ -7,9 +7,9 @@ fl_server:
 aggregation:
   fedAvg:
     fraction_fit: 1.0  # Percentage of client learning engagement
-    fraction_evaluate: 1.0,  # Percentage of client assessment participation
-    min_fit_clients: 1,  # Minimum number of training clients
-    min_evaluate_clients: 1,  # Minimum number of evaluation clients
+    fraction_evaluate: 1.0  # Percentage of client assessment participation
+    min_fit_clients: 1  # Minimum number of training clients
+    min_evaluate_clients: 1  # Minimum number of evaluation clients
     min_available_clients: 1 # Minimum number of clients
 
 # Set dataset name used by FL Task

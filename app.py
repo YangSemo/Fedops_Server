@@ -224,7 +224,9 @@ if __name__ == "__main__":
         logging.info('server close')
 
         # Modifying the model version in server manager
-        res = server_api.ServerAPI(task_id).put_fl_round_fin()
-        if res.status_code == 200:
-            logging.info('global model version upgrade')
+        server_api.ServerAPI(task_id).put_fl_round_fin()
+        logging.info('global model version upgrade')
+        # res = server_api.ServerAPI(task_id).put_fl_round_fin()
+        # if res.status_code == 200:
+        #     logging.info('global model version upgrade')
             # logging.info('global model version: ', res.json()['Server_Status']['GL_Model_V'])
