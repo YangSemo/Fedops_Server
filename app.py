@@ -33,7 +33,7 @@ server = server_utils.FLServerStatus()
 task_id = os.environ.get('TASK_ID')
 # task_id = os.getenv('TASK_ID')
 
-def init_gl_model_registration(model) -> None:
+def init_gl_model_registration(model, gl_model_name) -> None:
     global server
 
     logging.info(f'latest_gl_model_v: {server.latest_gl_model_v}')
@@ -45,10 +45,11 @@ def init_gl_model_registration(model) -> None:
 
         fl_server_start(init_model, model_name)
 
+
     else:
         logging.info('load latest global model')
 
-        fl_server_start(model)
+        fl_server_start(model, gl_model_name)
 
 
 def fl_server_start(model, model_name):
@@ -165,7 +166,7 @@ if __name__ == "__main__":
     # server.latest_gl_model_v = 0
 
     # Loaded latest global model or no global model
-    model, server.latest_gl_model_v = server_utils.model_download(task_id)
+    model, model_name,server.latest_gl_model_v = server_utils.model_download(task_id)
     # logging.info('Loaded latest global model or no global model')
 
     # New Global Model Version
@@ -214,7 +215,7 @@ if __name__ == "__main__":
         fl_start_time = time.time()
 
         # Run fl server
-        init_gl_model_registration(model)
+        init_gl_model_registration(model, model_name)
 
         fl_end_time = time.time() - fl_start_time  # FL end time
 
@@ -225,7 +226,7 @@ if __name__ == "__main__":
         logging.info('upload model in s3')
 
         # upload global model
-        global_model_name = f"{task_id}_gl_model_V{server.next_gl_model_v}.h5"
+        global_model_name = f"{model_name}_gl_model_V{server.next_gl_model_v}.h5"
         server_utils.upload_model_to_bucket(task_id, global_model_name)
 
         # server_status error

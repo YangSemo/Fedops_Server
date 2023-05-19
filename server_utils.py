@@ -90,13 +90,14 @@ def model_download(task_id):
 
         gl_model = tf.keras.models.load_model(gl_model_save_path)
 
-        return gl_model, gl_model_version
+        return gl_model, gl_model_name, gl_model_version
 
     # s3에 global model 없을 경우
     except Exception as e:
         logging.error('No read global model')
-        model_X = None
+        gl_model = None
+        gl_model_name = None
         gl_model_version=0
-        logging.info(f'gl_model: {model_X}, gl_model_v: {gl_model_version}')
+        logging.info(f'gl_model: {gl_model}, gl_model_v: {gl_model_version}')
 
-        return model_X, gl_model_version
+        return gl_model, gl_model_name, gl_model_version
