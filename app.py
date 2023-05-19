@@ -63,18 +63,22 @@ def fl_server_start(model, model_name):
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
 
-    # Create strategy
+    fraction_fit = float(config['aggregation']['fedAvg']['fraction_fit'])
+    fraction_evaluate = float(config['aggregation']['fedAvg']['fraction_evaluate'])
+    min_fit_clients = int(config['aggregation']['fedAvg']['min_fit_clients'])
+    min_evaluate_clients = int(config['aggregation']['fedAvg']['min_evaluate_clients'])
+    min_available_clients = int(config['aggregation']['fedAvg']['min_available_clients'])
+
     strategy = fl.server.strategy.FedAvg(
-        # fraction_fit > fraction_eval
-        fraction_fit=float(config['aggregation']['fedAvg']['fraction_fit']),
-        fraction_evaluate=float(config['aggregation']['fedAvg']['fraction_evaluate']),
-        min_fit_clients=int(config['aggregation']['fedAvg']['min_fit_clients']),
-        min_evaluate_clients=int(config['aggregation']['fedAvg']['min_evaluate_clients']),
-        min_available_clients=int(config['aggregation']['fedAvg']['min_available_clients']),
+        fraction_fit=fraction_fit,
+        fraction_evaluate=fraction_evaluate,
+        min_fit_clients=min_fit_clients,
+        min_evaluate_clients=min_evaluate_clients,
+        min_available_clients=min_available_clients,
         evaluate_fn=get_eval_fn(model, model_name),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
-        initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
+        initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights())
     )
 
     # Start Flower server (SSL-enabled) for four rounds of federated learning
@@ -127,10 +131,14 @@ def fit_config(rnd: int):
     """
     global server, config
 
+    batch_size = int(config['fl_server']['batch_size'])
+    local_epochs = int(config['fl_server']['local_epochs'])
+    num_rounds = int(config['fl_server']['num_rounds'])
+
     fl_config = {
-        "batch_size": int(config['fl_server']['batch_size']),
-        "local_epochs": int(config['fl_server']['local_epochs']),
-        "num_rounds": int(config['fl_server']['num_rounds']),
+        "batch_size": batch_size,
+        "local_epochs": local_epochs,
+        "num_rounds": num_rounds,
     }
 
     # increase round
