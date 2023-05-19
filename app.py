@@ -10,6 +10,8 @@ import datetime
 import os
 import requests, json
 import time
+
+import server_api
 import server_utils, server_task
 
 # TF warning log filtering
@@ -42,17 +44,18 @@ def init_gl_model_registration(model, gl_model_name) -> None:
 
         logging.info('init global model making')
         init_model, model_name = server_task.build_gl_model(dataset)
+        print(f'init_gl_model_name: {model_name}')
 
         fl_server_start(init_model, model_name)
+        return model_name
 
 
     else:
         logging.info('load latest global model')
+        print(f'latest_gl_model_name: {gl_model_name}')
 
         fl_server_start(model, gl_model_name)
-
-    print(f'model_name: {model_name}')
-    print(f'gl_model_name: {gl_model_name}')
+        return gl_model_name
 
 
 def fl_server_start(model, model_name):
@@ -102,15 +105,12 @@ def get_eval_fn(model, model_name):
         if server.round >= 1:
             # fit aggregation end time
             server.end_by_round = time.time() - server.start_by_round
-            # round_server_operation_time = str(datetime.timedelta(seconds=server.end_by_round))
-            server_time_result = {"round": server.round, "run_time_by_round": server.end_by_round}
-            json_time_result = json.dumps(server_time_result)
+            # gl model performance by round
+            server_eval_result = {"fl_task_id": task_id, "round": server.round, "gl_loss": loss, "gl_acc": accuracy,
+                                  "run_time_by_round": server.end_by_round, "next_gl_model_v":server.next_gl_model_v}
+            json_time_result = json.dumps(server_eval_result)
             logging.info(f'server_time - {json_time_result}')
 
-            # gl model performance by round
-            server_eval_result = {"round": server.round, "gl_loss": loss, "gl_accuracy": accuracy}
-            json_eval_result = json.dumps(server_eval_result)
-            logging.info(f'server_performance - {json_eval_result}')
 
         # model save
         model.save(f'/app/{model_name}_gl_model_V{server.next_gl_model_v}.h5')
@@ -175,74 +175,48 @@ if __name__ == "__main__":
     # New Global Model Version
     server.next_gl_model_v = server.latest_gl_model_v + 1
 
-    # Server manager address
-    # inform_SE: str = 'http://ccljhub.gachon.ac.kr:40019/FLSe/'
-    inform_SE: str = 'http://10.152.183.97:8000/FLSe/'
-
+    # API that sends server status to server manager
     inform_Payload = {
         'S3_bucket': 'fl-gl-model',  # bucket name
-        'Latest_GL_Model': 'gl_model_%s_V.h5' % server.latest_gl_model_v, # Model Weight File Name
+        'Latest_GL_Model': 'gl_model_%s_V.h5' % server.latest_gl_model_v,  # Model Weight File Name
         'Play_datetime': today_time,
         'FLSeReady': True,  # server ready status
         'GL_Model_V': server.latest_gl_model_v  # Current Global Model Version
-
     }
-
-    while True:
-        try:
-            # server_status => FL server ready
-            r = requests.put(inform_SE + 'FLSeUpdate/' + task_id, verify=False, data=json.dumps(inform_Payload))
-            if r.status_code == 200:
-                break
-            else:
-                logging.error(r.content)
-        except:
-            logging.error("Connection refused by the server..")
-            time.sleep(5)
-            continue
-
-    while True:
-        try:
-            # server_status => FL server ready
-            r = requests.put(inform_SE + 'FLSeUpdate/' + task_id, verify=False, data=json.dumps(inform_Payload))
-            if r.status_code == 200:
-                break
-            else:
-                logging.error(r.content)
-        except:
-            logging.error("Connection refused by the server..")
-            time.sleep(5)
-            continue
+    server_status_json = json.dumps(inform_Payload)
+    server_api.ServerAPI(task_id).put_server_status(server_status_json)
 
     try:
         fl_start_time = time.time()
 
         # Run fl server
-        init_gl_model_registration(model, model_name)
+        gl_model_name = init_gl_model_registration(model, model_name)
 
         fl_end_time = time.time() - fl_start_time  # FL end time
 
-        server_all_time_result = {"gl_model_v": server.next_gl_model_v, "operation_time": fl_end_time}
+        server_all_time_result = {"fl_task_id": task_id, "server_operation_time": fl_end_time, "next_gl_model_v": server.next_gl_model_v}
         json_all_time_result = json.dumps(server_all_time_result)
         logging.info(f'server_operation_time - {json_all_time_result}')
+        # Send server time result to performance pod
+        server_api.ServerAPI(task_id).put_server_time_result(json_all_time_result)
 
         # upload global model
-        global_model_name = f"{model_name}_gl_model_V{server.next_gl_model_v}.h5"
-        server_utils.upload_model_to_bucket(task_id, global_model_name)
+        global_model_file_name = f"{gl_model_name}_gl_model_V{server.next_gl_model_v}.h5"
+        server_utils.upload_model_to_bucket(task_id, global_model_file_name)
 
-        logging.info('upload model in s3')
+        logging.info(f'upload {global_model_file_name} model in s3')
 
         # server_status error
     except Exception as e:
         logging.error('error: ', e)
         data_inform = {'FLSeReady': False}
-        requests.put(inform_SE + 'FLSeUpdate/' + task_id, data=json.dumps(data_inform))
+        server_api.ServerAPI(task_id).put_server_status(json.dumps(data_inform))
 
     finally:
         logging.info('server close')
 
         # Modifying the model version in server manager
-        res = requests.put(inform_SE + 'FLRoundFin/' + task_id, params={'FLSeReady': 'false'})
+        res = server_api.ServerAPI().put_fl_round_fin()
         if res.status_code == 200:
             logging.info('global model version upgrade')
             # logging.info('global model version: ', res.json()['Server_Status']['GL_Model_V'])
