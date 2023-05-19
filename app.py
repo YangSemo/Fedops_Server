@@ -10,7 +10,7 @@ import datetime
 import os
 import requests, json
 import time
-import init_gl_model, server_utils, server_task
+import server_utils, server_task
 
 # TF warning log filtering
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -31,7 +31,7 @@ server = server_utils.FLServerStatus()
 
 # Set FL Task ID
 task_id = os.environ.get('TASK_ID')
-
+# task_id = os.getenv('TASK_ID')
 
 def init_gl_model_registration(model) -> None:
     global server
@@ -172,6 +172,7 @@ if __name__ == "__main__":
     server.next_gl_model_v = server.latest_gl_model_v + 1
 
     # Server manager address
+    # inform_SE: str = 'http://ccljhub.gachon.ac.kr:40019/FLSe/'
     inform_SE: str = 'http://10.152.183.97:8000/FLSe/'
 
     inform_Payload = {
@@ -182,6 +183,19 @@ if __name__ == "__main__":
         'GL_Model_V': server.latest_gl_model_v  # Current Global Model Version
 
     }
+
+    while True:
+        try:
+            # server_status => FL server ready
+            r = requests.put(inform_SE + 'FLSeUpdate/' + task_id, verify=False, data=json.dumps(inform_Payload))
+            if r.status_code == 200:
+                break
+            else:
+                logging.error(r.content)
+        except:
+            logging.error("Connection refused by the server..")
+            time.sleep(5)
+            continue
 
     while True:
         try:

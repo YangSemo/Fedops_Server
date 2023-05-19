@@ -2,6 +2,7 @@ import yaml
 import boto3
 import os, logging, re
 import tensorflow as tf
+# from dotenv import load_dotenv
 
 # FL Server Status Class
 class FLServerStatus:
@@ -20,18 +21,22 @@ def read_config():
     return config
 
 
-
+# load_dotenv()
 # 참고: https://loosie.tistory.com/210, https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
 # aws session 연결
 def aws_session(region_name='ap-northeast-2'):
     return boto3.session.Session(aws_access_key_id=os.environ.get('ACCESS_KEY_ID'),
                                  aws_secret_access_key=os.environ.get('ACCESS_SECRET_KEY'),
                                  region_name=region_name)
-
+# def aws_session(region_name='ap-northeast-2'):
+#     return boto3.session.Session(aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
+#                                  aws_secret_access_key=os.getenv('ACCESS_SECRET_KEY'),
+#                                  region_name=region_name)
 
 # s3에 global model upload
 def upload_model_to_bucket(task_id, global_model_name):
     bucket_name = os.environ.get('BUCKET_NAME')
+    # bucket_name = os.getenv('BUCKET_NAME')
 
     # logging.info(f'Upload {global_model_name}')
 
@@ -52,12 +57,13 @@ def upload_model_to_bucket(task_id, global_model_name):
 # Download the latest global model stored in s3
 def model_download(task_id):
     bucket_name = os.environ.get('BUCKET_NAME')
+    # bucket_name = os.getenv('BUCKET_NAME')
     # print('bucket_name: ', bucket_name)
 
     try:
         session = aws_session()
         s3_resource = session.client('s3')
-        bucket_list = s3_resource.list_objects(Bucket=bucket_name)
+        bucket_list = s3_resource.list_objects_v2(Bucket=bucket_name, Prefix=f'{task_id}/')
         content_list = bucket_list['Contents']
 
         # Inquiry global model file in s3 bucket

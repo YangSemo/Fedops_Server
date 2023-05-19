@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from keras.utils.np_utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 import init_gl_model
 
 """
