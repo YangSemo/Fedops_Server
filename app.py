@@ -66,11 +66,11 @@ def fl_server_start(model, model_name):
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         # fraction_fit > fraction_eval
-        fraction_fit=config['aggregation']['fedAvg']['fraction_fit'],
-        fraction_evaluate=config['aggregation']['fedAvg']['fraction_evaluate'],
-        min_fit_clients=config['aggregation']['fedAvg']['min_fit_clients'],
-        min_evaluate_clients=config['aggregation']['fedAvg']['min_evaluate_clients'],
-        min_available_clients=config['aggregation']['fedAvg']['min_available_clients'],
+        fraction_fit=float(config['aggregation']['fedAvg']['fraction_fit']),
+        fraction_evaluate=float(config['aggregation']['fedAvg']['fraction_evaluate']),
+        min_fit_clients=int(config['aggregation']['fedAvg']['min_fit_clients']),
+        min_evaluate_clients=int(config['aggregation']['fedAvg']['min_evaluate_clients']),
+        min_available_clients=int(config['aggregation']['fedAvg']['min_available_clients']),
         evaluate_fn=get_eval_fn(model, model_name),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
@@ -128,9 +128,9 @@ def fit_config(rnd: int):
     global server, config
 
     fl_config = {
-        "batch_size": config['fl_server']['batch_size'],
-        "local_epochs": config['fl_server']['local_epochs'],
-        "num_rounds": config['fl_server']['num_rounds'],
+        "batch_size": int(config['fl_server']['batch_size']),
+        "local_epochs": int(config['fl_server']['local_epochs']),
+        "num_rounds": int(config['fl_server']['num_rounds']),
     }
 
     # increase round
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         logging.info('server close')
 
         # Modifying the model version in server manager
-        res = server_api.ServerAPI().put_fl_round_fin()
+        res = server_api.ServerAPI(task_id).put_fl_round_fin()
         if res.status_code == 200:
             logging.info('global model version upgrade')
             # logging.info('global model version: ', res.json()['Server_Status']['GL_Model_V'])
