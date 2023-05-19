@@ -111,8 +111,11 @@ def get_eval_fn(model, model_name):
             # gl model performance by round
             server_eval_result = {"fl_task_id": task_id, "round": server.round, "gl_loss": loss, "gl_acc": accuracy,
                                   "run_time_by_round": server.end_by_round, "next_gl_model_v":server.next_gl_model_v}
-            json_time_result = json.dumps(server_eval_result)
-            logging.info(f'server_time - {json_time_result}')
+            json_server_eval = json.dumps(server_eval_result)
+            logging.info(f'server_eval_result - {json_server_eval}')
+
+            # send gl model evaluation to performance pod
+            server_api.ServerAPI(task_id).put_gl_model_evaluation(json_server_eval)
 
 
         # model save
