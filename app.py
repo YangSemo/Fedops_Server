@@ -83,9 +83,8 @@ def fl_server_start(model, model_name):
 
     # Start Flower server (SSL-enabled) for four rounds of federated learning
     fl.server.start_server(
-        # server_address="0.0.0.0:8080",
         server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=server.num_rounds),
+        config=fl.server.ServerConfig(num_rounds=int(config['fl_server']['num_rounds'])),
         strategy=strategy,
     )
 
