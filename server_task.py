@@ -1,7 +1,9 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.utils import to_categorical
-import init_gl_model
+
+import app
+import init_gl_model, server_utils
 
 """
 Build initial global model based on dataset name.
@@ -64,4 +66,13 @@ def load_data(dataset):
     y_val = to_categorical(y_val, num_classes)
 
     return x_val, y_val
+
+
+if __name__ == "__main__":
+    # Read server config file
+    config = server_utils.read_config()
+
+    # Start fl server
+    fl_server = app.FLServer()
+    fl_server.start()
 
