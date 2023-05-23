@@ -6,7 +6,7 @@ from keras.utils import to_categorical # keras>=2.10.0
 
 from fedops.server import app
 from fedops.server import server_utils
-from . import init_gl_model
+import init_gl_model
 
 
 """
