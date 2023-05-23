@@ -78,6 +78,6 @@ if __name__ == "__main__":
     config = server_utils.read_config(config_file_path)
 
     # Start fl server
-    fl_server = app.FLServer()
+    fl_server = app.FLServer(config)
     fl_server.start()
 
