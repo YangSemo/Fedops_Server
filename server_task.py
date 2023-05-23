@@ -1,9 +1,13 @@
 import tensorflow as tf
 import numpy as np
-from tensorflow.keras.utils import to_categorical
+# from keras.utils.np_utils import to_categorical # keras==2.8.0
+from keras.utils import to_categorical # keras>=2.10.0
 
-import app
-import init_gl_model, server_utils
+
+from fedops.server import app
+from fedops.server import server_utils
+from . import init_gl_model
+
 
 """
 Build initial global model based on dataset name.
@@ -70,7 +74,8 @@ def load_data(dataset):
 
 if __name__ == "__main__":
     # Read server config file
-    config = server_utils.read_config()
+    config_file_path = './config.yaml'
+    config = server_utils.read_config(config_file_path)
 
     # Start fl server
     fl_server = app.FLServer()
