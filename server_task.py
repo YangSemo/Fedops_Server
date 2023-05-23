@@ -63,7 +63,7 @@ def load_data(dataset):
     # Dataset for evaluating global model
     x_val, y_val = X_test[9000:10000], y_test[9000:10000]
 
-    # 전처리
+    # Preprocessing
     # x_val = x_val.astype('float32') / 255.0
 
     # y(label) one-hot encoding
@@ -77,7 +77,16 @@ if __name__ == "__main__":
     config_file_path = './config.yaml'
     config = server_utils.read_config(config_file_path)
 
+    # Dataset Name
+    dataset = config['data']['name']
+
+    # Build model
+    model, model_name = build_gl_model(dataset)
+
+    # Load Data
+    x_val, y_val = load_data(dataset)
+
     # Start fl server
-    fl_server = app.FLServer(config)
+    fl_server = app.FLServer(config, model, model_name, x_val, y_val)
     fl_server.start()
 

@@ -8,4 +8,4 @@ keras==2.10.0rc1
 pydantic
 numpy
 pyyaml
-fedops==0.1.7
+fedops==0.1.8
