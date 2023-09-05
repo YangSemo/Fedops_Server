@@ -78,7 +78,7 @@ if __name__ == "__main__":
     config = server_utils.read_config(config_file_path)
 
     # Dataset Name
-    dataset = config['data']['name']
+    dataset = 'cifar10'
 
     # Build model
     model, model_name = build_gl_model(dataset)
