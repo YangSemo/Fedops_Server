@@ -11,8 +11,8 @@ client:
 
 server:
   fl_round:
-    num_rounds: 20 # FL round
-    local_epochs: 5 # Client training epochs
+    num_rounds: 5 # FL round
+    local_epochs: 2 # Client training epochs
     batch_size: 128
     val_steps: 32
 
