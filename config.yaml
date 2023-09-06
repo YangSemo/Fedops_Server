@@ -20,6 +20,6 @@ server:
     fedAvg:
       fraction_fit: 1.0  # Percentage of client learning engagement
       fraction_evaluate: 1.0  # Percentage of client assessment participation
-      min_fit_clients: 5  # Minimum number of training clients
-      min_evaluate_clients: 5  # Minimum number of evaluation clients
-      min_available_clients: 5 # Minimum number of clients
+      min_fit_clients: 1  # Minimum number of training clients
+      min_evaluate_clients: 1  # Minimum number of evaluation clients
+      min_available_clients: 1 # Minimum number of clients
