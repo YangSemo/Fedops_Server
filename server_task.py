@@ -83,10 +83,13 @@ if __name__ == "__main__":
     # Build model
     model, model_name = build_gl_model(dataset)
 
+    # Check tensorflow or torch model
+    model_type = server_utils.identify_model(model)
+
     # Load Data
     x_val, y_val = load_data(dataset)
 
     # Start fl server
-    fl_server = app.FLServer(config, model, model_name, x_val, y_val)
+    fl_server = app.FLServer(config, model, model_name, model_type=model_type,x_val=x_val, y_val=y_val)
     fl_server.start()
 
